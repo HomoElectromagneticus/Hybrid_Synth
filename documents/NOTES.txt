@@ -1,0 +1,35 @@
+FPGA Synth Notes
+
+>	how fast must the DACs be multiplexed?
+	It looks like you would need to multiplex them at ~5MHz to be on the safe 
+	side, which means that the bus will be "holding" for only 200ns. Luckily, 
+	most parallel-input DACs only need 55ns for setup and hold on thier digital
+	inputs
+	
+	The now-ancient AD7545 from the original PPG synthesizers needed hundreds of
+	nanosecondss of setup-and-hold time. This limitation is likely part of the
+	reasons that the original PPG synthesizers "skipped" samples to achieve
+	higher pitches.
+	
+	Given all of this, dropping some samples is still necessary in order to keep
+	the bus speed to reasonable speeds.
+
+>	where to get good wavetables?
+
+>	how to handle pitch bends that transition the "no sample skipping" to 
+	"sample skipping" regions?
+
+>	how should the FPGA running the NCOs and the DAC input bus be interfaced
+	with? a microcontroller seems like a natural choice, but the input to each
+	NCO is 28 bits! perhaps packing a serial-to-parallel interface and wide MUX
+	into the FGPA is the way to go...
+
+>	the microcontroller should be able to generate all the CV needed for
+	envolopes and such, just like the old polysynths of yore used to do (single
+	CV DAC with a multiplexer and many hold capacitors)
+
+>	email bruno about this soon...
+
+>	The NCO should only allow the wave to change on "zero-crossings." Otherwise,
+	the sample-to-sample amplitude difference might be so great as to produce
+	an unwanted "click" or "thump" in the audio.

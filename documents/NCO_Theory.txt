@@ -1,0 +1,74 @@
+NCO Theory ===================================================================
+
+A Numerically Controlled Oscillator generates a sound by periodically assigning 
+digital samples that represent a sound to a DAC. The pitch of the sound is 
+determined by how often the NCO assigns a new sample to the DAC. Consider the 
+following simple graphic:
+
+	^
+  A	|
+  M	|                    x
+  P	|                  x . x
+  L	|                x . . . x
+  I	|              x . . . . . x
+  T	|x           x . . . . . . . x
+  U	|. x       x . . . . . . . . .
+  D	|. . x   x . . . . . . . . . .
+  E	|. . . x . . . . . . . . . . .
+	\-------------------------------->
+	 1 2 3 4 5 6 7 8 9 A B C D E F
+	    WAVESAMPLE NUMBER (HEX)
+
+The graphic represents an audio wave as a series of "wavesamples." A sound is 
+played by assigning each wavesample to the DAC one after another. Each sample
+is "played" in numerical order; 2 is played after 1, A is played after 9, etc.
+When wavesample "F" is output, the next wavesample will be "1." You can think 
+of this as looping. How quickly this "loop" is played determines the pitch of 
+the sound. The pitch can therefore be defined as:
+
+	Pitch = Rate of Wavesample Advancement [Hz] / Total Wavesamples in the Wave
+	
+How does an NCO determine when to play the next wavesample? It uses the
+overflow or "carry" event of a counter that is incremented by a multiplier and 
+a master clock. Assuming a 16-bit counter:
+
+	Rate of Overflow Events = (Clock Rate [Hz] * Multiplier ) / (2^16)
+								and
+	Rate of Overflow Events = Rate of Wavesample Advancement
+
+If we then assume a wave is represented by 128 digital samples:
+
+	Pitch = ((Clock Rate [Hz] * Multiplier) / (2^16) ) / 128
+
+The master clock rate, counter bit depth, are fixed by the physical form that
+implements an NCO, but the Multiplier and number of samples per wave are not.
+In practice, it makes life easier to also fix the number of samples per wave.
+We're left with only one variable - the Multiplier. By choosing different 
+values for the Multiplier, different pitches can be played from the DAC. In 
+this way, the oscillator is controlled by a number. Hence the term, Numerically
+Controlled Oscillator.
+
+This system works fine for low values of Multiplier relative to the counter bit 
+depth, but starts to break down as the Multiplier number grows. For this 
+reason, it's better to use as "large" a counter as is reasonable.
+
+Note that implementation performs digital wave playback at a variable sample 
+rate. In this case, the sample rate is equal to the pitch multiplied by the
+number of samples in the wave being played back. This is a very nice property 
+for a digital sound generator to have, because the alias frequencies inherent 
+to digital sound generation will all be harmonically related to the fundamental 
+of the pitch being played. Consider the following example:
+
+	Pitch = 220Hz
+	Number of Wavesamples Per Wave = 128
+	
+In this case, the sample rate would be 128 * 220 = 28,160Hz. Therefore, 
+any harmonic content greater than 14,080Hz (the Nyquist frequency is 
+equal to half of the sample rate) would be "folded back" as an alias. So
+if our 220Hz pitch wave had some information at the 100th harmonic 
+(22,000Hz), this "extra pitch" would appear as 7,920Hz, which is the 
+36th harmonic of 220Hz.
+
+This is a tremendous advantage for a musical instrument! What is 
+typically considered noise or "bad behavior," in digital-to-analog 
+conversion schemes becomes something musical. 

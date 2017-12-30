@@ -1,0 +1,51 @@
+Project Overview =============================================================
+
+The goal of this project is to create a polyphonic synthesizer that recreates
+the "problems" or "defects" with early digital synthesizers, with the
+understanding that these "defects" are the very things that made them great. A 
+quick overview of some the "defects" that this project would ideally 
+incorporate:
+
+*   Variable Sample-Rate Oscillators
+    The digital sample rate of an individual oscillator shall be an integer 
+    multiple of the pitch that very oscillator is producing. This means that 
+    any aliasing or artifacts in the digital audio path will be harmonically 
+    related to the fundamental pitch.
+
+*   Low Bit-Depth in the Digital Oscillator Waveforms
+    The oscillator waves shall be relatively low-fidelity. Given that the 
+    oscillator sample rate is an integer multiple of the oscillator pitch, 
+    the "crunchiness" one associates with low bit-depth audio will be "in-tune" 
+    with the oscillator pitch. The acoustic effect here is similar to what one
+    might hear from old "exciter" studio effects designed to give a sound more
+    upper harmonics.
+
+*   Wavetable Support
+    The synthesizer shall support wavetables as implemented on PPG 
+    synthesizers. Wavetables allow for oscillators to produce harmonics that
+    vary over time. Such time-variant harmonics can either create more natural
+    timbres, or allow the instrument to create really unworldly sounds.
+
+Other Project Features ========================================================
+
+*   Analog Filters and Analog VCAs
+    Each voice should have its own analog filter and amplifier circuit. A nice
+    analog filter can work magic on "crunchy" digital waves. An analog VCA is
+    preferred over a digital VCA for audio quality reasons.
+
+*   A Display and Simple User Interface
+    A synthesizer is an instrument - it should be simple and intuitive to use.
+
+*   MIDI Interface
+    You can't make an electronic instrument without a MIDI interface.
+
+Was This Overview Too Long? Did You Not Read it? ==============================
+
+Here's the short version. Instruments that sound like this:
+https://www.youtube.com/watch?v=s4lsEeujQw0
+https://www.youtube.com/watch?v=I6dqqaUXXH0
+https://www.youtube.com/watch?v=5y8fNnDJUx0
+Are not made any more, very expensive to purchase used, big, heavy, and are
+difficult to maintain. Could an entirely software instrument make the same 
+sounds? Probably, but then you'd have to be staring at yet another backlit LCD 
+screen to use it. Fuck that.
