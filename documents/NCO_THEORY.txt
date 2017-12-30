@@ -5,7 +5,7 @@ digital samples that represent a sound to a DAC. The pitch of the sound is
 determined by how often the NCO assigns a new sample to the DAC. Consider the 
 following simple graphic:
 
-	^
+    ^
   A	|
   M	|                    x
   P	|                  x . x
@@ -15,9 +15,9 @@ following simple graphic:
   U	|. x       x . . . . . . . . .
   D	|. . x   x . . . . . . . . . .
   E	|. . . x . . . . . . . . . . .
-	\-------------------------------->
-	 1 2 3 4 5 6 7 8 9 A B C D E F
-	    WAVESAMPLE NUMBER (HEX)
+    \-------------------------------->
+     1 2 3 4 5 6 7 8 9 A B C D E F
+        WAVESAMPLE NUMBER (HEX)
 
 The graphic represents an audio wave as a series of "wavesamples." A sound is 
 played by assigning each wavesample to the DAC one after another. Each sample
@@ -26,19 +26,19 @@ When wavesample "F" is output, the next wavesample will be "1." You can think
 of this as looping. How quickly this "loop" is played determines the pitch of 
 the sound. The pitch can therefore be defined as:
 
-	Pitch = Rate of Wavesample Advancement [Hz] / Total Wavesamples in the Wave
-	
+    Pitch = Rate of Wavesample Advancement [Hz] / Total Wavesamples in the Wave
+    
 How does an NCO determine when to play the next wavesample? It uses the
 overflow or "carry" event of a counter that is incremented by a multiplier and 
 a master clock. Assuming a 16-bit counter:
 
-	Rate of Overflow Events = (Clock Rate [Hz] * Multiplier ) / (2^16)
-								and
-	Rate of Overflow Events = Rate of Wavesample Advancement
+    Rate of Overflow Events = (Clock Rate [Hz] * Multiplier ) / (2^16)
+                                and
+    Rate of Overflow Events = Rate of Wavesample Advancement
 
 If we then assume a wave is represented by 128 digital samples:
 
-	Pitch = ((Clock Rate [Hz] * Multiplier) / (2^16) ) / 128
+    Pitch = ((Clock Rate [Hz] * Multiplier) / (2^16) ) / 128
 
 The master clock rate, counter bit depth, are fixed by the physical form that
 implements an NCO, but the Multiplier and number of samples per wave are not.
@@ -59,9 +59,9 @@ for a digital sound generator to have, because the alias frequencies inherent
 to digital sound generation will all be harmonically related to the fundamental 
 of the pitch being played. Consider the following example:
 
-	Pitch = 220Hz
-	Number of Wavesamples Per Wave = 128
-	
+    Pitch = 220Hz
+    Number of Wavesamples Per Wave = 128
+    
 In this case, the sample rate would be 128 * 220 = 28,160Hz. Therefore, 
 any harmonic content greater than 14,080Hz (the Nyquist frequency is 
 equal to half of the sample rate) would be "folded back" as an alias. So
