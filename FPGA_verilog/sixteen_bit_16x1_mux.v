@@ -1,6 +1,6 @@
 //=============================================================================
 // Design Name:		16bit wide, 16x1 multiplexer
-// File Name:		16b_16x1_mux.v
+// File Name:		sixteen_bit_16x1_mux.v
 // Author:			RM Schaub
 // Function:		A 16 bit wide, 16x1 multiplexer
 //=============================================================================
