@@ -12,7 +12,7 @@ FPGA Synth Notes
     higher pitches.
     
     Given all of this, dropping some samples is still necessary in order to keep
-    the bus speed to reasonable speeds.
+    the bus speed reasonable.
 
 >	where to get good wavetables?
 
@@ -21,13 +21,9 @@ FPGA Synth Notes
 
 >	how should the FPGA running the NCOs and the DAC input bus be interfaced
     with? a microcontroller seems like a natural choice, but the input to each
-    NCO is 28 bits! perhaps packing a serial-to-parallel interface and wide MUX
+    NCO is 27 bits! perhaps packing a serial-to-parallel interface and wide MUX
     into the FGPA is the way to go...
 
 >	the microcontroller should be able to generate all the CV needed for
     envolopes and such, just like the old polysynths of yore used to do (single
     CV DAC with a multiplexer and many hold capacitors)
-
->	The NCO should only allow the wave to change on "zero-crossings." 
-    Otherwise, the sample-to-sample amplitude difference might be so great as 
-    to produce an unwanted "click" or "thump" in the audio.
