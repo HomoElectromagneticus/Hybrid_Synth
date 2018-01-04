@@ -10,26 +10,27 @@ module NCO(
     i_clock, 
     i_input_latch_write_enable, 
     i_input,
-    o_wavesample_address
+    o_waveram_address
 );
 
     // inputs and outputs
-    // the input latch is 28 bits wide, with the lowest 18 being for wave pitch
-    // assignment, the next 3 are for "upper octave select," and the last 7 bits
+    // the input latch is 27 bits wide, with the lowest 18 being for wave pitch
+    // assignment, the next 3 are for "upper octave select," and the last 6 bits
     // being for wave select. "Upper octave select" just instructs the
     // wavesample address counter to skip some steps to keep the sample rates
     // within the realm of the sane
-    input 			i_clock;
-    input			i_input_latch_write_enable;
-    input [27:0]	i_input;
+    input i_clock;
+    input i_input_latch_write_enable;
+    input [26:0] i_input;
     
-    output [14:0]	o_waveram_address;
+    output [12:0] o_waveram_address;
     
     // registers and wires
-    reg [27:0]		r_input_latch;
-    reg [17:0]		r_phase_accumulator;
-    reg [7:0]		r_wavesample_address;
-    wire [14:0]		o_waveram_address;
+    reg [26:0] r_input_latch;
+    reg [17:0] r_phase_accumulator;
+    reg [6:0] r_wavesample_address;     // 128 samples per wave
+    reg [5:0] r_wave_address;           // 64 waves per wavetable
+    wire [12:0] o_waveram_address;      // 8192 unique samples in RAM
     
     // read the input and set the input latch
     always @(negedge i_clock) begin
@@ -42,6 +43,15 @@ module NCO(
     // for every clock pulse
     always @(posedge i_clock) begin
         r_phase_accumulator <= r_phase_accumulator + r_input_latch[17:0];
+    end
+
+    // limit changing waves within the wavetable to moments when there are
+    // known zero crossings in  the wave. we can only be 100% of a zero at the 
+    // very first wavesample (perhaps at the "middle" wavesample as well?)
+    always @(posedge i_clock) begin
+        if (r_wave_address == 0) begin
+            r_wave_address <= r_input_latch[26:21];
+	end
     end
     
     // if the most significant bit of the phase accumulator transitions from 0
@@ -67,6 +77,6 @@ module NCO(
         end
     end
     
-    assign o_waveram_address = {r_input_latch[27:21], r_wavesample_address};
+    assign o_waveram_address = {r_wave_address, r_wavesample_address};
     
 endmodule
