@@ -8,6 +8,7 @@
 
 module NCO(
     i_clock, 
+    i_reset,
     i_input_latch_write_enable, 
     i_input,
     o_waveram_address
@@ -20,6 +21,7 @@ module NCO(
     // wavesample address counter to skip some steps to keep the sample rates
     // within the realm of the sane
     input i_clock;
+    input i_reset;
     input i_input_latch_write_enable;
     input [26:0] i_input;
     
@@ -30,6 +32,7 @@ module NCO(
     reg [17:0] r_phase_accumulator;
     reg [6:0] r_wavesample_address;     // 128 samples per wave
     reg [5:0] r_wave_address;           // 64 waves per wavetable
+
     wire [12:0] o_waveram_address;      // 8192 unique samples in RAM
     
     // read the input and set the input latch
@@ -39,19 +42,25 @@ module NCO(
         end
     end
 
-    // increment the phase accumulator by the multiplier portion of the input
-    // for every clock pulse
     always @(posedge i_clock) begin
-        r_phase_accumulator <= r_phase_accumulator + r_input_latch[17:0];
-    end
-
-    // limit changing waves within the wavetable to moments when there are
-    // known zero crossings in  the wave. we can only be 100% of a zero at the 
-    // very first wavesample (perhaps at the "middle" wavesample as well?)
-    always @(posedge i_clock) begin
-        if (r_wave_address == 0) begin
-            r_wave_address <= r_input_latch[26:21];
-	end
+        if (i_reset) begin
+            r_phase_accumulator <= 0;
+            r_wave_address <= 0;
+            r_wavesample_address <= -1;		//the register will not actually 
+                                            //reset to zero unless this is "-1."
+                                            //i don't get it either...
+        end else begin
+        	// increment the phase accumulator by the multiplier portion of the 
+            // input for every clock pulse
+        	r_phase_accumulator <= r_phase_accumulator + r_input_latch[17:0];
+        	// limit changing waves within the wavetable to moments when there 
+            // are known zero crossings in the wave. we can only be 100% of a 
+            // zero at the very first wavesample (and at the "middle" 
+            // wavesample as well?)
+        	if (r_wave_address == 0) begin
+            		r_wave_address <= r_input_latch[26:21];
+	    	end
+	    end
     end
     
     // if the most significant bit of the phase accumulator transitions from 0
@@ -77,6 +86,6 @@ module NCO(
         end
     end
     
-    assign o_waveram_address = {r_wave_address, r_wavesample_address};
+	assign o_waveram_address = {r_wave_address, r_wavesample_address};
     
 endmodule

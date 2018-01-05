@@ -1,4 +1,4 @@
-`include "sixteen_bit_16x1_mux.v"
+`include "../sixteen_bit_16x1_mux.v"
 `timescale 1us/1ns
 
 module sixteen_bit_16x1_mux_tb();
@@ -22,9 +22,10 @@ module sixteen_bit_16x1_mux_tb();
     reg [15:0] r_F = 16'hFFFF;
     wire [15:0] w_OUTPUT;
 
+    always #1 r_CLOCK <= !r_CLOCK;
+
     // instantiate the unit under test
-    sixteen_bit_16x1_mux UUT
-    (
+    sixteen_bit_16x1_mux UUT(
         .i_select(r_SELECT),
         .i_0(r_0),
         .i_1(r_1),
@@ -47,7 +48,7 @@ module sixteen_bit_16x1_mux_tb();
 
     initial begin
         repeat (16) begin
-            #20
+            #10
             r_SELECT = r_SELECT + 1;
         end
     end
