@@ -31,28 +31,33 @@ module mixer(
     output [11:0] o_output;
     
     // registers
-    reg [7:0] i_sample_1_latch;
-    reg [7:0] i_sample_2_latch;
+    reg [7:0] r_sample_1_latch;
+    reg [7:0] r_sample_2_latch;
+    reg [2:0] r_sample_1_level_latch;
+    reg [2:0] r_sample_2_level_latch;
     reg [11:0] o_output;
     
-    // latch the inputs
+    // latch the inputs to protect against mid-execution input stage change
+    // weirdness
     always @(negedge i_clock) begin
         if (i_sample_1_load) begin
-            i_sample_1_latch <= i_sample;
+            r_sample_1_latch <= i_sample;
+            r_sample_1_level_latch <= i_sample_1_level;
         end
         if (i_sample_2_load) begin
-            i_sample_2_latch <= i_sample;
+            r_sample_2_latch <= i_sample;
+            r_sample_2_level_latch <= i_sample_2_level;
         end
     end
     
     always @(posedge i_clock) begin
         if (i_reset) begin
-            i_sample_1_latch <= 0;
-            i_sample_2_latch <= 0;
+            r_sample_1_latch <= 0;
+            r_sample_2_latch <= 0;
             o_output <= 0;
         // perform the mix step when triggered
         end else if (i_execute) begin
-            o_output <= (i_sample_1_latch >> !i_sample_1_level) + (i_sample_2_latch >> !i_sample_2_level);
+            o_output <= (r_sample_1_latch >> !r_sample_1_level_latch) + (r_sample_2_latch >> !r_sample_2_level_latch);
         end
     end
         
