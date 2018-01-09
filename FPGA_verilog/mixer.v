@@ -9,9 +9,8 @@
 module mixer(
     i_clock,
     i_reset,
-    i_sample_1, 
+    i_sample, 
     i_sample_1_load,
-    i_sample_2, 
     i_sample_2_load,
     i_sample_1_level, 
     i_sample_2_level,
@@ -22,9 +21,8 @@ module mixer(
     //inputs and outputs
     input i_clock;
     input i_reset;
-    input [7:0]	i_sample_1;
+    input [7:0]	i_sample;
     input i_sample_1_load;
-    input [7:0] i_sample_2;
     input i_sample_2_load;
     input [2:0]	i_sample_1_level;       //value should be kept under 6
     input [2:0]	i_sample_2_level;       //value should be kept under 6
@@ -40,10 +38,10 @@ module mixer(
     // latch the inputs
     always @(negedge i_clock) begin
         if (i_sample_1_load) begin
-            i_sample_1_latch <= i_sample_1;
+            i_sample_1_latch <= i_sample;
         end
         if (i_sample_2_load) begin
-            i_sample_2_latch <= i_sample_2;
+            i_sample_2_latch <= i_sample;
         end
     end
     
