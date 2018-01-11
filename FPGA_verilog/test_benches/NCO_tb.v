@@ -6,6 +6,7 @@ module NCO_tb();
     reg r_RESET = 1'b1;
     reg r_INPUT_LATCH_WRITE_ENABLE = 1'b1;
     reg [26:0] r_INPUT = 27'b000000000000000000000000000;
+    
     wire [12:0] w_OUTPUT;
 
     // instantiate the unit under test
