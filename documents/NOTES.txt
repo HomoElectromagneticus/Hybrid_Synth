@@ -27,3 +27,5 @@ FPGA Synth Notes
 >	the microcontroller should be able to generate all the CV needed for
     envolopes and such, just like the old polysynths of yore used to do (single
     CV DAC with a multiplexer and many hold capacitors)
+
+>   mixer input scaling via right shifting seems to work weird in simulation...
