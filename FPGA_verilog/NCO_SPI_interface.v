@@ -12,8 +12,10 @@ module NCO_SPI_interface(
     i_CS,
     i_MOSI,
     o_MISO,
-    o_parallel_output_latch,
-    o_mux_control
+    r_parallel_output,
+    r_MOSI_bit_count,
+    r_byte_received,
+    r_input_byte
 );
 
     // inputs and outputs
@@ -24,8 +26,10 @@ module NCO_SPI_interface(
     input i_MOSI;
     
     inout o_MISO;
-    output o_parallel_output_latch;
-    output o_mux_control;
+    output r_parallel_output;
+    output r_MOSI_bit_count;
+    output r_byte_received;
+    output [7:0] r_input_byte;
 
     // registers and wires
     reg [2:0] r_SCLK;
@@ -48,7 +52,7 @@ module NCO_SPI_interface(
 
     reg [1:0] r_byte_received_count;
     reg [32:0] r_parallel_output;
-    reg [32:0] o_parallel_output_latch;
+    reg [32:0] r_parallel_output_latch;
 
     // ========== SYNC THE SPI INPUTS TO THE FPGA ==========
     // sync SPI clock to the FPGA clock
@@ -68,7 +72,7 @@ module NCO_SPI_interface(
 
     // detect the state of the MOSI line
     always @(posedge i_clock) begin
-        r_MOSI <= {r_MOSI[1], i_MOSI};
+        r_MOSI <= {r_MOSI[0], i_MOSI};
     end
     assign w_MOSI_data = r_MOSI[1];
 
@@ -84,7 +88,7 @@ module NCO_SPI_interface(
             r_input_byte <= {r_input_byte[6:0], w_MOSI_data};
         end
         // byte received flag goes high if we have pulled in a full byte
-        r_byte_received <= (w_CS_active && w_CS_rising_edge && (r_MOSI_bit_count == 3'b111));
+        r_byte_received <= (w_CS_active && (r_MOSI_bit_count == 3'b111));
     end
 
     // ========== HANDLE INPUT BYTES ===========
@@ -104,12 +108,12 @@ module NCO_SPI_interface(
     // ========== OUTPUT ==========
     // o_MISO is in high-impedance mode if the chip is not selected, but driven
     // to the last input byte otherwise. this implements the SPI "ring buffer"
-    assign o_MISO = ~w_CS_active ? r_input_byte[7] : 1'bz;
+    assign o_MISO = w_CS_active ? r_input_byte[7] : 1'bz;
 
     always @(posedge i_clock) begin
         // enable 32-bit parallel output if it's ready
         if (r_byte_received_count == 4) begin
-            o_parallel_output_latch <= r_parallel_output;
+            r_parallel_output_latch <= r_parallel_output;
         end
     end
 
@@ -123,6 +127,8 @@ module NCO_SPI_interface(
             r_byte_received_count <= 0;
             r_byte_received <= 0;
             r_input_byte <= 0;
+            r_parallel_output <= 0;
+            r_parallel_output_latch <= 0;
         end
     end
 
