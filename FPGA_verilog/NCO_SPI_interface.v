@@ -13,9 +13,7 @@ module NCO_SPI_interface(
     i_MOSI,
     o_MISO,
     r_parallel_output,
-    r_MOSI_bit_count,
-    r_byte_received,
-    r_input_byte
+    r_parallel_output_latch
 );
 
     // inputs and outputs
@@ -27,9 +25,7 @@ module NCO_SPI_interface(
     
     inout o_MISO;
     output r_parallel_output;
-    output r_MOSI_bit_count;
-    output r_byte_received;
-    output [7:0] r_input_byte;
+    output r_parallel_output_latch;
 
     // registers and wires
     reg [2:0] r_SCLK;
@@ -44,13 +40,13 @@ module NCO_SPI_interface(
     reg [1:0] r_MOSI;
     wire w_MOSI_data;
 
-    reg [2:0] r_MOSI_bit_count;
+    reg [3:0] r_MOSI_bit_count;
     reg r_byte_received;              //high when a full byte is received
     reg [7:0] r_input_byte;
 
     reg o_MISO;
 
-    reg [1:0] r_byte_received_count;
+    reg [2:0] r_byte_received_count;
     reg [32:0] r_parallel_output;
     reg [32:0] r_parallel_output_latch;
 
@@ -88,11 +84,12 @@ module NCO_SPI_interface(
             r_input_byte <= {r_input_byte[6:0], w_MOSI_data};
         end
         // byte received flag goes high if we have pulled in a full byte
-        r_byte_received <= (w_CS_active && (r_MOSI_bit_count == 3'b111));
+        r_byte_received <= (w_CS_active && (r_MOSI_bit_count == 4'b1000));
     end
 
     // ========== HANDLE INPUT BYTES ===========
-    always @(posedge i_clock) begin
+    always @(negedge i_clock) begin
+	// if we've taken in a full byte and...
         if (r_byte_received == 1) begin
             // load each byte into the parallel output register
             case(r_byte_received_count)
@@ -102,6 +99,8 @@ module NCO_SPI_interface(
                 3: r_parallel_output[31:24] <= r_input_byte;
             endcase
             r_byte_received_count <= r_byte_received_count + 1;
+	    r_MOSI_bit_count <= 0;
+	    // r_byte_received will be reset at the next positive clock edge
         end
     end
 
