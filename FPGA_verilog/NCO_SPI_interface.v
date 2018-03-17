@@ -12,7 +12,6 @@ module NCO_SPI_interface(
     i_CS,
     i_MOSI,
     o_MISO,
-    r_parallel_output,
     r_parallel_output_latch
 );
 
@@ -24,7 +23,6 @@ module NCO_SPI_interface(
     input i_MOSI;
     
     inout o_MISO;
-    output r_parallel_output;
     output r_parallel_output_latch;
 
     // registers and wires
@@ -41,8 +39,8 @@ module NCO_SPI_interface(
     wire w_MOSI_data;
 
     reg [3:0] r_MOSI_bit_count;
-    reg r_byte_received;              //high when a full byte is received
-    reg [7:0] r_input_byte;
+    reg r_byte_received;                //high when a full byte is received
+    reg [7:0] r_SPI_SR;		            //8-bit shift register for SPI xfer
 
     reg o_MISO;
 
@@ -63,7 +61,7 @@ module NCO_SPI_interface(
         r_CS <= {r_CS[1:0], i_CS};
     end
     assign w_CS_rising_edge = (r_CS[2:1] == 2'b01);
-    assign w_CS_active = ~r_CS[1];            //CS is active low for SPI
+    assign w_CS_active = ~r_CS[1];      //CS is active low for SPI
     assign w_CS_falling_edge = (r_CS[2:1] == 2'b10);
 
     // detect the state of the MOSI line
@@ -81,7 +79,7 @@ module NCO_SPI_interface(
         // left-shift the bits in on each positive edge of the SPI clock
         end else if (w_SCLK_rising_edge) begin
             r_MOSI_bit_count <= r_MOSI_bit_count + 1;
-            r_input_byte <= {r_input_byte[6:0], w_MOSI_data};
+            r_SPI_SR <= {r_SPI_SR[6:0], w_MOSI_data};
         end
         // byte received flag goes high if we have pulled in a full byte
         r_byte_received <= (w_CS_active && (r_MOSI_bit_count == 4'b1000));
@@ -89,25 +87,24 @@ module NCO_SPI_interface(
 
     // ========== HANDLE INPUT BYTES ===========
     always @(negedge i_clock) begin
-	// if we've taken in a full byte and...
         if (r_byte_received == 1) begin
-            // load each byte into the parallel output register
+            // load each input byte into the parallel output register
             case(r_byte_received_count)
-                0: r_parallel_output[7:0] <= r_input_byte; 
-                1: r_parallel_output[15:8] <= r_input_byte;
-                2: r_parallel_output[23:16] <= r_input_byte;
-                3: r_parallel_output[31:24] <= r_input_byte;
+                0: r_parallel_output[7:0] <= r_SPI_SR; 
+                1: r_parallel_output[15:8] <= r_SPI_SR;
+                2: r_parallel_output[23:16] <= r_SPI_SR;
+                3: r_parallel_output[31:24] <= r_SPI_SR;
             endcase
             r_byte_received_count <= r_byte_received_count + 1;
-	    r_MOSI_bit_count <= 0;
-	    // r_byte_received will be reset at the next positive clock edge
+            r_MOSI_bit_count <= 0;
+            // r_byte_received will be reset at the next positive clock edge
         end
     end
 
     // ========== OUTPUT ==========
     // o_MISO is in high-impedance mode if the chip is not selected, but driven
     // to the last input byte otherwise. this implements the SPI "ring buffer"
-    assign o_MISO = w_CS_active ? r_input_byte[7] : 1'bz;
+    assign o_MISO = w_CS_active ? r_SPI_SR[7] : 1'bz;
 
     always @(posedge i_clock) begin
         // enable 32-bit parallel output if it's ready
@@ -125,7 +122,7 @@ module NCO_SPI_interface(
             r_MOSI_bit_count <= 0;
             r_byte_received_count <= 0;
             r_byte_received <= 0;
-            r_input_byte <= 0;
+            r_SPI_SR <= 0;
             r_parallel_output <= 0;
             r_parallel_output_latch <= 0;
         end
