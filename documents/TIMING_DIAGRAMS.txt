@@ -1,0 +1,32 @@
+Put each of these sections here to see the resulting diagrams:
+http://wavedrom.com/editor.html
+
+
+WaveRAM Address Logic
+
+{signal: [
+  {name: 'Phase Accumulator Overflow', wave: 'P..|....'},
+  {name: 'Wavesample Address', wave: '===|====', data: ['0', '1', '2', '127', '0', '1','2']},
+  {name: 'Wavesample Address Overflow', wave:'0..|.10.'},
+  {name: 'Wave Address', wave: '=..|.=..', data: ['x', 'y'] },
+  {name: 'WaveRAM Address', wave: '===|====', data: ['x+0', 'x+1', 'x+2','x+127', 'y+0', 'y+1','y+2']}
+  ],
+  config: { hscale: 2 },
+  head:{text:'WaveRAM Address Logic (Wavesample Address + Wave Address = WaveRAM Address)'},
+ foot:{text:'Assuming a 7-bit Wavesample Address Space'}
+}
+
+SPI Interface
+
+{signal: [
+  {name: 'SPI_CLK', wave: 'P............'},
+  {name: 'SPI_CS', wave: '1..0.......1.'},
+  {name: 'SPI_MOSI', wave: '0..10101010..'},
+  {name: 'SPI_MISO', wave: 'zzzxxxxxxxxzz'},
+  {name: 'Internal Shift Register', wave: 'xxxxxxxxxxx2.', data: '0xAA'},
+  {name: 'Byte Recieved Register', wave: '2..........2.', data:['3', '4']},
+  {name: 'Refresh the Output to the NCOs', wave: '0..........10'}
+  ],
+  head: {text: "SPI Interface Logic, from the FPGA's Perspective"},
+  foot: {text: "MISO will output the last byte recieved while the next byte is clocked in."},
+}
