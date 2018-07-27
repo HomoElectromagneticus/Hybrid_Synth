@@ -1,0 +1,9 @@
+NCO Control Word:
+Bit: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+     \------------------------------------/ \---/ \---------------/
+                Pitch Assignement           Upper         Wave
+                                            Octave       Select
+                                            Select
+
+So many bits must be devoted to pitch assignent so that the pitch may be
+accurate to within 4 cents near 20Hz. The original PPG Wave used only 13 bits!
