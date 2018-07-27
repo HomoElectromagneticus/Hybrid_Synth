@@ -57,7 +57,7 @@ module NCO(
             // are known zero crossings in the wave. we can only be 100% of a 
             // zero at the very first wavesample (and at the "middle" 
             // wavesample as well?)
-        	if (r_wave_address == 0) begin
+        	if (r_wavesample_address == 0) begin
             		r_wave_address <= r_input_latch[26:21];
 	    	end
 	    end
