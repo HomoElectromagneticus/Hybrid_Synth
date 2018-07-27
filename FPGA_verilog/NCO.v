@@ -15,8 +15,8 @@ module NCO(
 );
 
     // inputs and outputs
-    // the input latch is 27 bits wide, with the lowest 18 being for wave pitch
-    // assignment, the next 3 are for "upper octave select," and the last 6 bits
+    // the input latch is 24 bits wide, with the lowest 16 being for wave pitch
+    // assignment, the next 2 are for "upper octave select," and the last 6 bits
     // being for wave select. "Upper octave select" just instructs the
     // wavesample address counter to skip some steps to keep the sample rates
     // within the realm of the sane
@@ -28,17 +28,21 @@ module NCO(
     output [12:0] o_waveram_address;
     
     // registers and wires
-    reg [26:0] r_input_latch;
+    reg [15:0] r_pa_multiplier;         // multiplier for the phase accum.
+    reg [1:0] r_octave_select;
+    reg [5:0] r_wave_select;
     reg [17:0] r_phase_accumulator;
     reg [6:0] r_wavesample_address;     // 128 samples per wave
     reg [5:0] r_wave_address;           // 64 waves per wavetable
 
     wire [12:0] o_waveram_address;      // 8192 unique samples in RAM
     
-    // read the input and set the input latch
+    // read the input and set the latched registers
     always @(negedge i_clock) begin
         if (i_input_latch_write_enable) begin
-            r_input_latch <= i_input;
+            r_pa_multiplier <= i_input[15:0];
+            r_octave_select <= i_input[17:16];
+            r_wave_select <= i_input[23:18];
         end
     end
 
@@ -52,13 +56,13 @@ module NCO(
         end else begin
         	// increment the phase accumulator by the multiplier portion of the 
             // input for every clock pulse
-        	r_phase_accumulator <= r_phase_accumulator + r_input_latch[17:0];
+        	r_phase_accumulator <= r_phase_accumulator + r_pa_multiplier;
         	// limit changing waves within the wavetable to moments when there 
             // are known zero crossings in the wave. we can only be 100% of a 
             // zero at the very first wavesample (and at the "middle" 
             // wavesample as well?)
         	if (r_wavesample_address == 0) begin
-            		r_wave_address <= r_input_latch[26:21];
+            		r_wave_address <= r_wave_select;
 	    	end
 	    end
     end
@@ -69,20 +73,14 @@ module NCO(
     // wavesample address is incremented. as the desired output pitch raises, 
     // some wavesamples must be "skipped" to keep the sample rate down
     always @(negedge r_phase_accumulator[17]) begin
-        if (r_input_latch[20:18] == 0) begin
+        if (r_octave_select == 0) begin
             r_wavesample_address <= r_wavesample_address + 1;
-        end else if (r_input_latch[20:18] == 1) begin
+        end else if (r_octave_select == 1) begin
             r_wavesample_address <= r_wavesample_address + 2;
-        end else if (r_input_latch[20:18] == 2) begin
+        end else if (r_octave_select == 2) begin
             r_wavesample_address <= r_wavesample_address + 4;
-        end else if (r_input_latch[20:18] == 3) begin
+        end else if (r_octave_select == 3) begin
             r_wavesample_address <= r_wavesample_address + 8;
-        end else if (r_input_latch[20:18] == 4) begin
-            r_wavesample_address <= r_wavesample_address + 16;
-        end else if (r_input_latch[20:18] == 5) begin
-            r_wavesample_address <= r_wavesample_address + 32;
-        end else if (r_input_latch[20:18] == 6) begin
-            r_wavesample_address <= r_wavesample_address + 64;
         end
     end
     

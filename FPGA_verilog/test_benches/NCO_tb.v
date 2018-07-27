@@ -5,7 +5,7 @@ module NCO_tb();
     reg r_CLOCK = 1'b0;
     reg r_RESET = 1'b1;
     reg r_INPUT_LATCH_WRITE_ENABLE = 1'b1;
-    reg [26:0] r_INPUT = 27'b000000000000000000000000000;
+    reg [23:0] r_INPUT = 24'b000000000000000000000000;
     
     wire [12:0] w_OUTPUT;
 
@@ -26,25 +26,25 @@ module NCO_tb();
         #5
         r_INPUT_LATCH_WRITE_ENABLE = 0;
 	    #5
-        r_INPUT = 27'b000000000000000001100110110;      //playing G0
+        r_INPUT = 24'b000000000000000011001110;      //playing G0
         #10
         r_INPUT_LATCH_WRITE_ENABLE = 1;
         #5
         r_INPUT_LATCH_WRITE_ENABLE = 0;
         #5
-        r_INPUT = 27'b000000000000010001001001011;      //playing C4
+        r_INPUT = 24'b000000000000100010010011;      //playing C4
         #1000
         r_INPUT_LATCH_WRITE_ENABLE = 1;
         #5
         r_INPUT_LATCH_WRITE_ENABLE = 0;
         #5
-        r_INPUT = 27'b000000001000111001101011000;      //playing A6
+        r_INPUT = 24'b000000000011110011010110;      //playing A6
         #100
         r_INPUT_LATCH_WRITE_ENABLE = 1;
         #5
         r_INPUT_LATCH_WRITE_ENABLE = 0;
         #5
-        r_INPUT = 27'b100000001000111001101011000;      //changing wave address
+        r_INPUT = 24'b100000000011110011010110;      //changing wave address
         #100
         r_INPUT_LATCH_WRITE_ENABLE = 1;
         #5
